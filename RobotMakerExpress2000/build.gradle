@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'application'
     id 'org.gradle.java.experimental-jigsaw' version '0.1.1'
 }
 
@@ -11,3 +11,4 @@ dependencies {
 }
 
 javaModule.name = 'RobotMakerExpress2000'
+mainClassName = 'com.example.big.troublesome.corp.robot.maker2k.RobotMkrXp2k'
