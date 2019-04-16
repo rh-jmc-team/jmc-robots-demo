@@ -1,0 +1,3 @@
+module RobotShop {
+    requires RobotCommons;
+}
