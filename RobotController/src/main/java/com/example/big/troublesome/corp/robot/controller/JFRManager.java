@@ -43,11 +43,19 @@ public class JFRManager {
     }
     
     public void startRercording() {
+        if (jfr == null) {
+            System.err.println("Could not initialize JFR");
+            return;
+        }
         id = jfr.newRecording();
         jfr.startRecording(id);
     }
 
     public File stopRecording() {
+        if (jfr == null) {
+            System.err.println("Could not initialize JFR");
+            return null;
+        }
         
         jfr.stopRecording(id);        
         try {

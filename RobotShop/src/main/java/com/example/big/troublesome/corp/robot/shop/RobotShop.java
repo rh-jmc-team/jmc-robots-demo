@@ -62,7 +62,7 @@ public class RobotShop {
         Thread controlServer = new Thread(new Runnable() {
             @Override
             public void run() {
-                ClientSocketHandler.connect(ServicePorts.STORAGE, new ClientHandler() {
+                ClientSocketHandler.connect("robotmaker", ServicePorts.STORAGE, new ClientHandler() {
                     @Override
                     public void handle(Message message) {
                         System.err.println("acknowledge: " + message);

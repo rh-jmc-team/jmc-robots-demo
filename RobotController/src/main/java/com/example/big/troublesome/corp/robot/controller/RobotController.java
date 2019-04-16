@@ -25,7 +25,7 @@ public class RobotController {
         Thread controller = new Thread(new Runnable() {
             @Override
             public void run() {
-                ClientSocketHandler.connect(ServicePorts.PRODUCTION_LINE, new ClientHandler() {
+                ClientSocketHandler.connect("robotmaker", ServicePorts.PRODUCTION_LINE, new ClientHandler() {
                     @Override
                     public void handle(Message message) {
                         if (Protocol.FACTORY_ID.equals(message.protocol)) {

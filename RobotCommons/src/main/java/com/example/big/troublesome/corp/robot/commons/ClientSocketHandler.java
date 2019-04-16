@@ -16,7 +16,11 @@ public class ClientSocketHandler {
     }
 
     public static void connect(int port, ClientHandler handler) {
-        try (Socket socket = new Socket("localhost", port);
+        connect("localhost", port, handler);
+    }
+
+    public static void connect(String host, int port, ClientHandler handler) {
+        try (Socket socket = new Socket(host, port);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));)
         {
