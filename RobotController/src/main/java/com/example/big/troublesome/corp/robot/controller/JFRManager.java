@@ -38,13 +38,13 @@ public class JFRManager {
             jfr = JMX.newMXBeanProxy(mBeanServer, jfrBeanName, FlightRecorderMXBean.class);
             
         } catch (Exception e) {
+            System.err.println("Could not initialize JFR");
             e.printStackTrace();
         }
     }
     
     public void startRercording() {
         if (jfr == null) {
-            System.err.println("Could not initialize JFR");
             return;
         }
         id = jfr.newRecording();
@@ -53,7 +53,6 @@ public class JFRManager {
 
     public File stopRecording() {
         if (jfr == null) {
-            System.err.println("Could not initialize JFR");
             return null;
         }
         
