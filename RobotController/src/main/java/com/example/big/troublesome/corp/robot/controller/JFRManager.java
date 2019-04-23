@@ -53,31 +53,130 @@ public class JFRManager {
             return null;
         }
         
+        jfr.stopRecording(id);
         try {
-            jfr.stopRecording(id);
-            
-            long streamId = jfr.openStream(id, null);
-            byte[] chunks = new byte[0];
-            while (true) {
-                byte[] chunk = jfr.readStream(streamId);
-                if (chunk == null) {
-                    break;
-                }
-                chunks = concat(chunks, chunk);
-            }
-            jfr.closeRecording(id);
-            return new ByteArrayInputStream(chunks);
+            return new FlightRecordingInputStream(jfr.openStream(id, null), jfr);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private static byte[] concat(byte[] a, byte[] b) {
-        byte[] out = new byte[a.length + b.length];
-        System.arraycopy(a, 0, out, 0, a.length);
-        System.arraycopy(b, 0, out, a.length, b.length);
-        return out;
+    static class FlightRecordingInputStream extends InputStream {
+
+        private static final int EOF = -1;
+
+        private final long streamId;
+        private final FlightRecorderMXBean jfr;
+        private byte[] buf = null;
+        private int pos = EOF;
+
+        FlightRecordingInputStream(long id, FlightRecorderMXBean jfr) {
+            streamId = id;
+            this.jfr = jfr;
+        }
+
+        private void readChunk() throws IOException {
+            if (pos != EOF && pos < buf.length) {
+                return;
+            }
+            buf = jfr.readStream(streamId);
+            pos = 0;
+        }
+
+        @Override
+        public int available() throws IOException {
+            if (buf == null) {
+                return 0;
+            }
+            return Math.max(0, buf.length - pos);
+        }
+
+        @Override
+        public int read() throws IOException {
+            readChunk();
+            if (buf == null) {
+                return EOF;
+            }
+            return buf[pos++];
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            if (b == null) {
+                throw new NullPointerException();
+            }
+            if (b.length == 0) {
+                return 0;
+            }
+            readChunk();
+            int len = Math.min(b.length, buf.length - pos);
+            if (len == 0) {
+                return 0;
+            }
+            if (buf == null) {
+                return EOF;
+            }
+            System.arraycopy(buf, 0, b, 0, len);
+            pos += len;
+            return len;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int reqLen) throws IOException {
+            if (b == null) {
+                throw new NullPointerException();
+            }
+            if (b.length == 0) {
+                return 0;
+            }
+            readChunk();
+            if (buf == null) {
+                return EOF;
+            }
+            int len = Math.min(Math.min(b.length, reqLen), buf.length - pos);
+            if (len == 0) {
+                return 0;
+            }
+            System.arraycopy(buf, pos, b, off, len);
+            pos += len;
+            return len;
+        }
+
+        @Override
+        public byte[] readAllBytes() throws IOException {
+            byte[] out = new byte[0];
+            pos = 0;
+            while (true) {
+                byte[] chunk = jfr.readStream(streamId);
+                if (chunk == null) {
+                    break;
+                }
+                if (out.length == 0) {
+                    out = chunk;
+                } else {
+                    out = concat(out, chunk);
+                }
+            }
+            return out;
+        }
+
+        @Override
+        public void close() throws IOException {
+            jfr.closeRecording(streamId);
+        }
+
+        @Override
+        public boolean markSupported() {
+            return false;
+        }
+
+        private static byte[] concat(byte[] a, byte[] b) {
+            byte[] out = new byte[a.length + b.length];
+            System.arraycopy(a, 0, out, 0, a.length);
+            System.arraycopy(b, 0, out, a.length, b.length);
+            return out;
+        }
     }
 
 }
