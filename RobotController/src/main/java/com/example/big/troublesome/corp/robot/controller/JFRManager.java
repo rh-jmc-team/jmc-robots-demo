@@ -11,8 +11,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import jdk.management.jfr.FlightRecorderMXBean;
 
 public class JFRManager {
@@ -65,7 +63,7 @@ public class JFRManager {
                 if (chunk == null) {
                     break;
                 }
-                chunks = ArrayUtils.addAll(chunks, chunk);
+                chunks = concat(chunks, chunk);
             }
             jfr.closeRecording(id);
             return new ByteArrayInputStream(chunks);
@@ -73,6 +71,13 @@ public class JFRManager {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private static byte[] concat(byte[] a, byte[] b) {
+        byte[] out = new byte[a.length + b.length];
+        System.arraycopy(a, 0, out, 0, a.length);
+        System.arraycopy(b, 0, out, a.length, b.length);
+        return out;
     }
 
 }
