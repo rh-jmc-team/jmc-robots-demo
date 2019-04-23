@@ -27,10 +27,8 @@ public class JFRManager {
     public void connect() {
         try {
             System.err.println(pid);
-            VirtualMachine vm = VirtualMachine.attach("" + pid);
-            String connectionString = vm.startLocalManagementAgent();
 
-            JMXServiceURL serviceURL = new JMXServiceURL(connectionString);
+            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9091/jmxrmi");
             JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
             MBeanServerConnection mBeanServer = connector.getMBeanServerConnection();
 
