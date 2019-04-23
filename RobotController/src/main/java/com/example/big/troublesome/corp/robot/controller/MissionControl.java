@@ -48,7 +48,9 @@ public class MissionControl {
             System.err.println("requested: " + requested + ", available: " + available);
             return (available/requested);
             
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
         return 0;
     }
