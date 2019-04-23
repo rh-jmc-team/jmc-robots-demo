@@ -1,7 +1,8 @@
 package com.example.big.troublesome.corp.robot.controller;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
@@ -10,7 +11,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import com.sun.tools.attach.VirtualMachine;
+import org.apache.commons.lang3.ArrayUtils;
 
 import jdk.management.jfr.FlightRecorderMXBean;
 
@@ -28,7 +29,7 @@ public class JFRManager {
         try {
             System.err.println(pid);
 
-            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9091/jmxrmi");
+            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://robotmaker:9091/jmxrmi");
             JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
             MBeanServerConnection mBeanServer = connector.getMBeanServerConnection();
 
@@ -49,25 +50,29 @@ public class JFRManager {
         jfr.startRecording(id);
     }
 
-    public File stopRecording() {
+    public InputStream stopRecording() {
         if (jfr == null) {
             return null;
         }
         
-        jfr.stopRecording(id);        
         try {
-            File recording = File.createTempFile("robot-maker-xpress-2k-" + id,".jfr");
-            System.err.println(recording);
-            jfr.copyTo(id, recording.getCanonicalPath());
+            jfr.stopRecording(id);
+            
+            long streamId = jfr.openStream(id, null);
+            byte[] chunks = new byte[0];
+            while (true) {
+                byte[] chunk = jfr.readStream(streamId);
+                if (chunk == null) {
+                    break;
+                }
+                chunks = ArrayUtils.addAll(chunks, chunk);
+            }
             jfr.closeRecording(id);
-            
-            return recording;
-            
+            return new ByteArrayInputStream(chunks);
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        
-        return null;
     }
 
 }

@@ -1,6 +1,8 @@
 package com.example.big.troublesome.corp.robot.controller;
 
-import java.io.File;
+import static org.openjdk.jmc.common.unit.UnitLookup.NUMBER;
+
+import java.io.InputStream;
 
 import org.openjdk.jmc.common.item.Aggregators;
 import org.openjdk.jmc.common.item.Attribute;
@@ -9,8 +11,6 @@ import org.openjdk.jmc.common.item.IItemCollection;
 import org.openjdk.jmc.common.item.ItemFilters;
 import org.openjdk.jmc.common.unit.IQuantity;
 import org.openjdk.jmc.flightrecorder.JfrLoaderToolkit;
-
-import static org.openjdk.jmc.common.unit.UnitLookup.NUMBER;
 
 public class MissionControl {
     private static final String EVENT_NAME = "com.example.big.troublesome.corp.robot.maker2k.LogWhatsUpp$RobotEventStorageRequested";
@@ -25,7 +25,7 @@ public class MissionControl {
         return aggregate.doubleValue();
     }
     
-    public double analyse(File recording) {
+    public double analyse(InputStream recording) {
         if (recording == null) {
             System.err.println("Recording to analyze was null");
             return 0;

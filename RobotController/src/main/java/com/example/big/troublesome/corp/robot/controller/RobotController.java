@@ -1,6 +1,6 @@
 package com.example.big.troublesome.corp.robot.controller;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 
 import com.example.big.troublesome.corp.robot.commons.ClientHandler;
@@ -77,9 +77,9 @@ public class RobotController {
                         // the interesting bits
                         jfr.startRercording();
                         Thread.sleep(5_000);
-                        File recording = jfr.stopRecording();
+                        InputStream stream = jfr.stopRecording();
                         
-                        double ratio = jmc.analyse(recording);
+                        double ratio = jmc.analyse(stream);
                         System.err.println("ratio: " + ratio);
                        
                         long delta = DELTA;
