@@ -27,11 +27,16 @@ public class MissionControl {
     
     public double analyse(File recording) {
         if (recording == null) {
+            System.err.println("Recording to analyze was null");
             return 0;
         }
         
         try {
             IItemCollection events = JfrLoaderToolkit.loadEvents(recording);
+            if (!events.hasItems()) {
+                System.err.println("No events in recording");
+                return 0;
+            }
             
             double requested = getAverage(REQUESTED, events);
             double available = getAverage(AVAILABLE, events);
