@@ -6,8 +6,8 @@ function cleanup() {
     set +e
     # TODO: better container management
     for i in robotshop robotcontroller robotmaker; do
-        docker kill "$(docker ps -a -q --filter ancestor=robotshop/$i)"
-        docker rm "$(docker ps -a -q --filter ancestor=robotshop/$i)"
+        docker kill "$(docker ps -a -q --filter ancestor=andrewazores/$i)"
+        docker rm "$(docker ps -a -q --filter ancestor=andrewazores/$i)"
     done
 }
 
@@ -24,7 +24,7 @@ for i in robotmaker robotcontroller robotshop; do
         --name $i \
         --memory 80M \
         -P \
-        --rm -d "robotshop/$i"
+        --rm -d "andrewazores/$i"
 done
 
 docker run \

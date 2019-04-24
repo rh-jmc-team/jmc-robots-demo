@@ -19,7 +19,7 @@ jib {
         image = 'gcr.io/distroless/java:11'
     }
     to {
-        image = 'robotshop/robotmaker'
+        image = 'andrewazores/robotmaker'
     }
     container {
         useCurrentTimestamp = true
