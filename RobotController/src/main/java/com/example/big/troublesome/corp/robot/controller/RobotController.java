@@ -29,8 +29,7 @@ public class RobotController {
                     @Override
                     public void handle(Message message) {
                         if (Protocol.FACTORY_ID.equals(message.protocol)) {
-                            long pid = Long.valueOf(message.payload);
-                            jfr.setPid(pid);
+                            jfr.setHost(message.payload);
                             latch.countDown();
                             
                         } else if (Protocol.PRODUCTION_THRESHOLD.equals(message.protocol)) {

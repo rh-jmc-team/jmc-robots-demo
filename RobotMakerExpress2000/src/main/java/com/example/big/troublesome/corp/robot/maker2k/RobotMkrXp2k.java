@@ -1,5 +1,7 @@
 package com.example.big.troublesome.corp.robot.maker2k;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.example.big.troublesome.corp.robot.commons.Handler;
@@ -47,11 +49,14 @@ public class RobotMkrXp2k {
                         Message reply = Message.EMPTY;
                         
                         if (Protocol.FACTORY_ID.equals(message.protocol)) {
-                            ProcessHandle me = ProcessHandle.current();
-                            
                             reply = new Message();
                             reply.protocol = Protocol.FACTORY_ID;
-                            reply.payload = "" + me.pid();
+                            try {
+                                reply.payload = InetAddress.getLocalHost().getHostName();
+                            } catch (UnknownHostException e) {
+                                e.printStackTrace();
+                                reply.payload = "robotmaker";
+                            }
                         } else if (Protocol.PRODUCTION_THRESHOLD.equals(message.protocol)) {
                             reply = new Message();
                             reply.protocol = Protocol.PRODUCTION_THRESHOLD;

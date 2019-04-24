@@ -15,19 +15,19 @@ import jdk.management.jfr.FlightRecorderMXBean;
 
 public class JFRManager {
 
-    private long pid;
+    private String host;
     private FlightRecorderMXBean jfr;
     private long id;
     
-    public void setPid(long pid) {
-        this.pid = pid;
+    public void setHost(String host) {
+        this.host = host;
     }
     
     public void connect() {
         try {
-            System.err.println(pid);
+            System.err.println(host);
 
-            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://robotmaker:9091/jmxrmi");
+            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":9091/jmxrmi");
             JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
             MBeanServerConnection mBeanServer = connector.getMBeanServerConnection();
 
