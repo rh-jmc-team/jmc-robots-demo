@@ -23,7 +23,7 @@ jib {
     }
     container {
         useCurrentTimestamp = true
-        ports = ['9091']
+        ports = ['9091', '12500', '12501']
         jvmFlags = [
             '-Dcom.sun.management.jmxremote.rmi.port=9091',
             '-Dcom.sun.management.jmxremote=true',
