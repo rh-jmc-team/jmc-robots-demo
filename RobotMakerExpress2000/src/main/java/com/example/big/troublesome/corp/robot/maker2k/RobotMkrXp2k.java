@@ -52,7 +52,7 @@ public class RobotMkrXp2k {
                             reply = new Message();
                             reply.protocol = Protocol.FACTORY_ID;
                             try {
-                                reply.payload = InetAddress.getLocalHost().getHostName();
+                                reply.payload = InetAddress.getLocalHost().getHostAddress();
                             } catch (UnknownHostException e) {
                                 e.printStackTrace();
                                 reply.payload = "robotmaker";
