@@ -54,7 +54,7 @@ public class JFRManager {
         
         jfr.stopRecording(id);
         try {
-            return new FlightRecordingInputStream(jfr.openStream(id, null), jfr);
+            return new FlightRecordingInputStream(id, jfr.openStream(id, null), jfr);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -65,13 +65,15 @@ public class JFRManager {
 
         private static final int EOF = -1;
 
+        private final long recordingId;
         private final long streamId;
         private final FlightRecorderMXBean jfr;
         private byte[] buf = null;
         private int pos = EOF;
 
-        FlightRecordingInputStream(long id, FlightRecorderMXBean jfr) {
-            streamId = id;
+        FlightRecordingInputStream(long recordingId, long streamId, FlightRecorderMXBean jfr) {
+            this.recordingId = recordingId;
+            this.streamId = streamId;
             this.jfr = jfr;
         }
 
@@ -163,7 +165,7 @@ public class JFRManager {
         @Override
         public void close() throws IOException {
             jfr.closeStream(streamId);
-            jfr.closeRecording(streamId);
+            jfr.closeRecording(recordingId);
         }
 
         @Override
