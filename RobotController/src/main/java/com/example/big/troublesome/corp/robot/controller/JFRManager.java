@@ -61,6 +61,18 @@ public class JFRManager {
         }
     }
 
+    public void closeRecording() {
+        if (jfr == null) {
+            return;
+        }
+
+        try {
+            jfr.closeRecording(id);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     static class FlightRecordingInputStream extends InputStream {
 
         private static final int EOF = -1;

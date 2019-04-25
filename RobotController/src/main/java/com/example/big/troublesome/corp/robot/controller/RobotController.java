@@ -80,6 +80,7 @@ public class RobotController {
                         
                         double ratio = jmc.analyse(stream);
                         System.err.println("ratio: " + ratio);
+                        jfr.closeRecording();
                        
                         long delta = DELTA;
                         if (ratio <= 2) {
