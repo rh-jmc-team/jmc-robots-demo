@@ -1,5 +1,6 @@
 package com.example.big.troublesome.corp.robot.controller;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 
@@ -76,33 +77,33 @@ public class RobotController {
                         // the interesting bits
                         jfr.startRercording();
                         Thread.sleep(5_000);
-                        InputStream stream = jfr.stopRecording();
-                        
-                        double ratio = jmc.analyse(stream);
-                        System.err.println("ratio: " + ratio);
-                        jfr.closeRecording();
-                       
-                        long delta = DELTA;
-                        if (ratio <= 2) {
-                            delta = -delta;
-                        } else if (delta > 2 && delta <= 10) {
-                            delta = 0;
-                        }
-                        
-                        long _currentThreshold = currentThreshold + delta;
-                        if (_currentThreshold < DELTA) {
-                            _currentThreshold = DELTA;
-                        }
-                        
-                        if (_currentThreshold < 15_000) {
-                            System.err.println("setting threshold to: " + _currentThreshold);
-                            message = new Message();
-                            message.protocol = Protocol.PRODUCTION_THRESHOLD_UPDATE;
-                            message.payload = "" + _currentThreshold;
-                            ClientSocketHandler.queue(message);   
+                        try (InputStream stream = jfr.stopRecording()) {
+                            double ratio = jmc.analyse(stream);
+                            System.err.println("ratio: " + ratio);
+
+                            long delta = DELTA;
+                            if (ratio <= 2) {
+                                delta = -delta;
+                            } else if (delta > 2 && delta <= 10) {
+                                delta = 0;
+                            }
+
+                            long _currentThreshold = currentThreshold + delta;
+                            if (_currentThreshold < DELTA) {
+                                _currentThreshold = DELTA;
+                            }
+
+                            if (_currentThreshold < 15_000) {
+                                System.err.println("setting threshold to: " + _currentThreshold);
+                                message = new Message();
+                                message.protocol = Protocol.PRODUCTION_THRESHOLD_UPDATE;
+                                message.payload = "" + _currentThreshold;
+                                ClientSocketHandler.queue(message);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
-                    
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
