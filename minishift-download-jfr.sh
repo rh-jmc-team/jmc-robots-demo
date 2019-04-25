@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOST="$(oc get route/jmx-client | sed -n 2p | tr -s ' ' | cut -d ' ' -f 2)"
+HOST="$(oc get route/jmx-client-exporter | sed -n 2p | tr -s ' ' | cut -d ' ' -f 2)"
 
 if [ -z $HOST ]; then
     exit 1

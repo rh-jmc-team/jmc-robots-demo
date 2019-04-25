@@ -11,7 +11,7 @@ function cleanup() {
 
 function oc_expose() {
     sleep 10 # TODO replace this with a proper wait for the pod to be available
-    oc expose -l "$LABEL" svc/jmx-client
+    oc expose -l "$LABEL" svc/jmx-client --name=jmx-client-exporter
 }
 
 trap cleanup EXIT
