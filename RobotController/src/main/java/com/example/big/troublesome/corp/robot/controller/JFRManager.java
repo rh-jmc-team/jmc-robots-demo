@@ -162,6 +162,7 @@ public class JFRManager {
 
         @Override
         public void close() throws IOException {
+            jfr.closeStream(streamId);
             jfr.closeRecording(streamId);
         }
 
