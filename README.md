@@ -10,23 +10,25 @@ instance for instrumenting the three demo applications with JFR.
 ## Openshift (Minishift) Run
 
 Install and configure [Minishift](https://github.com/minishift/minishift) and
-ensure that your `oc` cli commands are working. Then run
-`sh minishift-setup.sh`, which will create a new project named `robots`
+ensure that your `oc` cli commands are working. `cd minishift` into the utility
+script directory.
+
+Then run `sh setup.sh`, which will create a new project named `robots`
 containing an application corresponding to each of the three applications
 within this project.
 
-Next, run `sh minishift-client-run.sh` to start a `container-jmc` instance
+Next, run `sh client-run.sh` to start a `container-jmc` instance
 within the Minishift node, which can then be used interactively to instrument
 each demo application using JFR. Alternatively, run
-`sh minishift-run-daemon.sh` to run the `container-jmc` instance in
+`sh run-daemon.sh` to run the `container-jmc` instance in
 non-interactive mode (this will require `jq` to be installed on your local
 system), and use `nc` to connect to the client afterwards.
 
-`sh minishift-download-jfr.sh foo` can be used to download a recording named
+`sh download-jfr.sh foo` can be used to download a recording named
 `foo` from the `container-jmc` recording exporter. This will save to
 `$PWD/foo.jfr`.
 
-Finally, `sh minishift-update-images.sh` can be used to update the Minishift
+Finally, `sh update-images.sh` can be used to update the Minishift
 image registry with the latest application images from the upstream remote
 Docker image repository.
 
