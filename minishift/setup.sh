@@ -3,6 +3,11 @@
 set -x
 set -e
 
+if ! [ -x "$(command -v jq)" ]; then
+    echo 'Error: jq is not installed.' >&2
+    exit 1
+fi
+
 oc new-project robots
 
 for i in robotmaker robotcontroller robotshop container-jmc-web; do
