@@ -1,12 +1,12 @@
 plugins {
     id 'java-library'
-    id 'org.gradle.java.experimental-jigsaw'// version '0.1.1'
 }
+
+group = 'com.example.big.troublesome.corp'
+version = '0.0.1'
 
 repositories {
 }
 
 dependencies {
 }
-
-javaModule.name = 'RobotCommons'

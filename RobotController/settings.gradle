@@ -15,5 +15,21 @@ include 'api'
 include 'services:webservice'
 */
 
+// Can be removed once Quarkus is published on Gradle Plugin Portal
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'io.quarkus') {
+                useModule("io.quarkus:quarkus-gradle-plugin:${requested.version}")
+            }
+        }
+    }
+}
+
 rootProject.name = 'RobotController'
 includeFlat 'RobotCommons'

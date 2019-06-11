@@ -11,15 +11,20 @@ public class Message {
         }
     };
     
-    static Message create(String message) {
+    public static Message create(String message) {
         if (message == null) {
             return EMPTY;
         }
         
         Message theMessage  = new Message();
-        String[] parts = message.split(":");
-        theMessage.protocol = Protocol.valueOf(parts[0]);
-        theMessage.payload = parts[1];
+
+        try {
+            String[] parts = message.split(":");
+            theMessage.protocol = Protocol.valueOf(parts[0]);
+            theMessage.payload = parts[1];
+        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+            throw new IllegalArgumentException("Could not parse message", e);
+        }
         
         return theMessage;
     }

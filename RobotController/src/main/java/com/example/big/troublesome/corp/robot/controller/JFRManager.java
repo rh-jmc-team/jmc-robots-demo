@@ -10,9 +10,14 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jdk.management.jfr.FlightRecorderMXBean;
 
 public class JFRManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JFRManager.class);
 
     private String host;
     private FlightRecorderMXBean jfr;
@@ -24,7 +29,7 @@ public class JFRManager {
     
     public void connect() {
         try {
-            System.err.println(host);
+            LOGGER.info(host);
 
             JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":9091/jmxrmi");
             JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
@@ -34,8 +39,7 @@ public class JFRManager {
             jfr = JMX.newMXBeanProxy(mBeanServer, jfrBeanName, FlightRecorderMXBean.class);
             
         } catch (Exception e) {
-            System.err.println("Could not initialize JFR");
-            e.printStackTrace();
+            LOGGER.error("Could not initialize JFR", e);
         }
     }
     
@@ -56,7 +60,7 @@ public class JFRManager {
         try {
             return new FlightRecordingInputStream(id, jfr.openStream(id, null), jfr);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to open recording", e);
             return null;
         }
     }

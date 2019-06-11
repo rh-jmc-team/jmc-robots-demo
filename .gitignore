@@ -13,3 +13,4 @@ nb-configuration.xml
 .hg
 .vscode/*
 /target/
+.gradle
