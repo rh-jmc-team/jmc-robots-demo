@@ -78,3 +78,11 @@ WS_CLIENT_URL="ws://$(oc get route/jmx-client -o json | jq -r '.spec.host')/comm
 oc set env dc/jmx-client CONTAINER_DOWNLOAD_HOST="$CLIENT_URL"
 
 oc set env dc/container-jmc-web CONTAINER_JMX_CLIENT_URL="$WS_CLIENT_URL"
+
+oc create -f "$(dirname "$(readlink -f "$0")")/persistent-volume-claim.yaml"
+
+oc set volume dc/jmx-client \
+    --add --claim-name "container-jmc" \
+    --type="persistentVolumeClaim" \
+    --mount-path="/flightrecordings" \
+    --containers="*"
