@@ -6,8 +6,6 @@ import java.io.InputStream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
@@ -27,9 +25,6 @@ public class RobotController {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(RobotController.class);
 
-    private static final JFRManager jfr = new JFRManager();
-    private static final MissionControl jmc = new MissionControl();
-
     private static volatile long currentThreshold = 100;
 
     private static final long DELTA = 100;
@@ -37,14 +32,16 @@ public class RobotController {
     @Inject
     @RestClient
     RobotMakerControlService service;
-    
+
     private final Thread jfrChecker;
+    private final MissionControl jmc;
 
     public RobotController() {
+        jmc = new MissionControl();
         jfrChecker = new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
+                try (JFRManager jfr = new JFRManager()) {
                     // Wait for service to become available
                     waitForService();
 
@@ -60,7 +57,7 @@ public class RobotController {
                             String thresholdStr = safeGetPayload(thresholdResp, Protocol.PRODUCTION_THRESHOLD);
                             currentThreshold = Long.valueOf(thresholdStr);
 
-                            analyzeRecording();
+                            analyzeRecording(jfr);
                         } catch (IOException e) {
                             LOGGER.error("Error reading recording", e);
                         }
@@ -99,7 +96,7 @@ public class RobotController {
         }
     }
 
-    private void analyzeRecording() throws InterruptedException, IOException {
+    private void analyzeRecording(JFRManager jfr) throws InterruptedException, IOException {
         // the interesting bits
         jfr.startRercording();
         Thread.sleep(5_000);
@@ -124,11 +121,12 @@ public class RobotController {
                 Message message = new Message();
                 message.protocol = Protocol.PRODUCTION_THRESHOLD_UPDATE;
                 message.payload = "" + _currentThreshold;
-                Response response = service.updateProductionThreshold(message.toString());
-                StatusType type = response.getStatusInfo();
-                if (Status.OK.getStatusCode() != type.getStatusCode()) {
-                    LOGGER.error("bad response from server: HTTP " + type.getStatusCode()
-                    + " - " + type.getReasonPhrase());
+                try (Response response = service.updateProductionThreshold(message.toString())) {
+                    StatusType type = response.getStatusInfo();
+                    if (Status.OK.getStatusCode() != type.getStatusCode()) {
+                        LOGGER.error("bad response from server: HTTP " + type.getStatusCode()
+                        + " - " + type.getReasonPhrase());
+                    }
                 }
             }
         }
@@ -137,8 +135,8 @@ public class RobotController {
     private void waitForService() throws InterruptedException {
         boolean started = false;
         while (!started) {
-            try {
-                started = (service.isAvailable().getStatus() == Status.OK.getStatusCode());
+            try (Response resp = service.isAvailable()) {
+                started = (resp.getStatus() == Status.OK.getStatusCode());
             } catch (Exception e) {
                 LOGGER.info("Tried connecting to RobotMaker: " + e.getMessage());
             }
