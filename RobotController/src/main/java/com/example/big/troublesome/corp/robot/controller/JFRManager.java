@@ -15,13 +15,15 @@ import org.slf4j.LoggerFactory;
 
 import jdk.management.jfr.FlightRecorderMXBean;
 
-public class JFRManager {
+public class JFRManager implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JFRManager.class);
 
     private String host;
     private FlightRecorderMXBean jfr;
     private long id;
+
+    private JMXConnector connector;
     
     public void setHost(String host) {
         this.host = host;
@@ -32,7 +34,7 @@ public class JFRManager {
             LOGGER.info(host);
 
             JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":9091/jmxrmi");
-            JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
+            connector = JMXConnectorFactory.connect(serviceURL);
             MBeanServerConnection mBeanServer = connector.getMBeanServerConnection();
 
             ObjectName jfrBeanName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
@@ -43,6 +45,18 @@ public class JFRManager {
         }
     }
     
+    @Override
+    public void close() throws IOException {
+        if (connector != null) {
+            try {
+                connector.close();
+                connector = null;
+            } catch (IOException e) {
+                LOGGER.error("Failed to close JMX connection", e);
+            }
+        }
+    }
+
     public void startRercording() {
         if (jfr == null) {
             return;

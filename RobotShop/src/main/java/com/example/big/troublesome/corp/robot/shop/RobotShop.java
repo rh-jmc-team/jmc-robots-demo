@@ -91,13 +91,17 @@ public class RobotShop {
                 try {
                     while (!Thread.currentThread().isInterrupted()) {
                         Message message = messages.take();
-                        Response response = service.buy(message.toString());
-                        StatusType type = response.getStatusInfo();
-                        if (Status.OK.getStatusCode() != type.getStatusCode()) {
-                            LOGGER.error("bad response from server: HTTP " + type.getStatusCode()
-                            + " - " + type.getReasonPhrase());
+                        try (Response response = service.buy(message.toString())) {
+                            StatusType type = response.getStatusInfo();
+                            if (Status.OK.getStatusCode() != type.getStatusCode()) {
+                                LOGGER.error("bad response from server: HTTP " + type.getStatusCode()
+                                + " - " + type.getReasonPhrase());
+                            } else if (response.hasEntity()){
+                                String respBody = response.readEntity(String.class);
+                                Message respMsg = Message.create(respBody);
+                                LOGGER.info("acknowledge: " + respMsg);
+                            }
                         }
-                        LOGGER.info("acknowledge: " + message);
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -134,8 +138,8 @@ public class RobotShop {
     private void waitForService() throws InterruptedException {
         boolean started = false;
         while (!started) {
-            try {
-                started = (service.isAvailable().getStatus() == Status.OK.getStatusCode());
+            try (Response resp = service.isAvailable()) {
+                started = (resp.getStatus() == Status.OK.getStatusCode());
             } catch (Exception e) {
                 LOGGER.info("Tried connecting to RobotMaker: " + e.getMessage());
             }
