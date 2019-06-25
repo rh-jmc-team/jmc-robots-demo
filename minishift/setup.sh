@@ -3,7 +3,7 @@
 set -x
 set -e
 
-ROBOTS_SOURCE_REPO="${ROBOTS_SOURCE_REPO:-https://github.com/andrewazores/jmc-robots-demo}"
+ROBOTS_SOURCE_REPO="${ROBOTS_SOURCE_REPO:-https://github.com/rh-jmc-team/jmc-robots-demo}"
 
 COMMON_JAVA_ARGS="-Dcom.sun.management.jmxremote.rmi.port=9091 \
 -Dcom.sun.management.jmxremote=true \
@@ -53,36 +53,37 @@ create_robot_app RobotShop robotshop 'http://robotmaker:8080'
 
 create_robot_app RobotController robotcontroller 'http://robotmaker:8080'
 
-oc new-app docker.io/andrewazores/container-jmc-web --name=container-jmc-web
+oc new-app quay.io/rh-jmc-team/container-jfr-web --name=container-jfr-web
 
-oc delete svc container-jmc-web
+oc delete svc container-jfr-web
 
-oc expose dc container-jmc-web --target-port=8080 --port=80
+oc expose dc container-jfr-web --target-port=8080 --port=80
 
-oc expose svc container-jmc-web
+oc expose svc container-jfr-web
 
-oc new-app docker.io/andrewazores/container-jmx-client --name=jmx-client
+oc new-app quay.io/rh-jmc-team/container-jfr --name=container-jfr
 
-oc set env dc/jmx-client CONTAINER_DOWNLOAD_PORT="8080"
+oc set env dc/container-jfr CONTAINER_JFR_DOWNLOAD_PORT="8080"
 
-oc expose dc jmx-client --name=jmx-client-exporter --port=8080
+oc expose dc container-jfr --name=container-jfr-exporter --port=8080
 
-oc expose svc jmx-client-exporter
+oc expose svc container-jfr-exporter
 
-oc expose svc jmx-client --port=9090
+oc expose svc container-jfr --port=9090
 
-CLIENT_URL="$(oc get route/jmx-client-exporter -o json | jq -r '.spec.host')"
+CLIENT_URL="$(oc get route/container-jfr-exporter -o json | jq -r '.spec.host')"
 
-WS_CLIENT_URL="ws://$(oc get route/jmx-client -o json | jq -r '.spec.host')/command"
+WS_CLIENT_URL="ws://$(oc get route/container-jfr -o json | jq -r '.spec.host')/command"
 
-oc set env dc/jmx-client CONTAINER_DOWNLOAD_HOST="$CLIENT_URL"
+oc set env dc/container-jfr CONTAINER_JFR_DOWNLOAD_HOST="$CLIENT_URL"
 
-oc set env dc/container-jmc-web CONTAINER_JMX_CLIENT_URL="$WS_CLIENT_URL"
+oc set env dc/container-jfr-web CONTAINER_JFR_URL="$WS_CLIENT_URL"
 
 oc create -f "$(dirname "$(readlink -f "$0")")/persistent-volume-claim.yaml"
 
-oc set volume dc/jmx-client \
-    --add --claim-name "container-jmc" \
+oc set volume dc/container-jfr \
+    --add --claim-name "container-jfr" \
     --type="persistentVolumeClaim" \
     --mount-path="/flightrecordings" \
     --containers="*"
+

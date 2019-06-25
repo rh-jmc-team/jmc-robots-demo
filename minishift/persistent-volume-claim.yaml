@@ -1,7 +1,7 @@
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
-  name: "container-jmc"
+  name: "container-jfr"
 spec:
   accessModes:
     - "ReadWriteMany"
