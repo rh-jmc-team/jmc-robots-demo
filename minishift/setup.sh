@@ -45,6 +45,12 @@ fi
 
 oc new-project robots
 
+oc create sa discovery
+
+oc create role service-lister --verb=list --resource=services
+
+oc policy add-role-to-user --role-namespace=robots service-lister -z discovery
+
 oc import-image --confirm "${ROBOTS_BUILDER_IMAGE}"
 
 create_robot_app RobotMakerExpress2000 robotmaker
@@ -53,7 +59,7 @@ create_robot_app RobotShop robotshop 'http://robotmaker:8080'
 
 create_robot_app RobotController robotcontroller 'http://robotmaker:8080'
 
-oc new-app quay.io/rh-jmc-team/container-jfr-web:0.1.0 --name=container-jfr-web
+oc new-app quay.io/rh-jmc-team/container-jfr-web:0.2.0 --name=container-jfr-web
 
 oc delete svc container-jfr-web
 
@@ -61,7 +67,9 @@ oc expose dc container-jfr-web --target-port=8080 --port=80
 
 oc expose svc container-jfr-web
 
-oc new-app quay.io/rh-jmc-team/container-jfr:0.1.0 --name=container-jfr
+oc new-app quay.io/rh-jmc-team/container-jfr:0.2.3 --name=container-jfr
+
+oc patch dc/container-jfr -p '{"spec":{"template":{"spec":{"serviceAccountName":"discovery"}}}}'
 
 oc set env dc/container-jfr CONTAINER_JFR_DOWNLOAD_PORT="8080"
 
