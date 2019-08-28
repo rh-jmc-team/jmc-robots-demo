@@ -59,33 +59,27 @@ create_robot_app RobotShop robotshop 'http://robotmaker:8080'
 
 create_robot_app RobotController robotcontroller 'http://robotmaker:8080'
 
-oc new-app quay.io/rh-jmc-team/container-jfr-web:0.2.0 --name=container-jfr-web
-
-oc delete svc container-jfr-web
-
-oc expose dc container-jfr-web --target-port=8080 --port=80
-
-oc expose svc container-jfr-web
-
-oc new-app quay.io/rh-jmc-team/container-jfr:0.2.3 --name=container-jfr
+oc new-app quay.io/rh-jmc-team/container-jfr:latest --name=container-jfr
 
 oc patch dc/container-jfr -p '{"spec":{"template":{"spec":{"serviceAccountName":"discovery"}}}}'
 
-oc set env dc/container-jfr CONTAINER_JFR_DOWNLOAD_PORT="8080"
+oc expose dc/container-jfr --name=command-channel --port=9090
 
-oc expose dc container-jfr --name=container-jfr-exporter --port=8080
+oc expose svc/command-channel
 
-oc expose svc container-jfr-exporter
+oc expose svc/container-jfr
 
-oc expose svc container-jfr --port=9090
+oc set env dc/container-jfr CONTAINER_JFR_WEB_PORT="8181"
 
-CLIENT_URL="$(oc get route/container-jfr-exporter -o json | jq -r '.spec.host')"
+oc set env dc/container-jfr CONTAINER_JFR_EXT_WEB_PORT="80"
 
-WS_CLIENT_URL="ws://$(oc get route/container-jfr -o json | jq -r '.spec.host')/command"
+oc set env dc/container-jfr CONTAINER_JFR_LISTEN_PORT="9090"
 
-oc set env dc/container-jfr CONTAINER_JFR_DOWNLOAD_HOST="$CLIENT_URL"
+oc set env dc/container-jfr CONTAINER_JFR_EXT_LISTEN_PORT="80"
 
-oc set env dc/container-jfr-web CONTAINER_JFR_URL="$WS_CLIENT_URL"
+oc set env dc/container-jfr CONTAINER_JFR_WEB_HOST="$(oc get route/container-jfr -o json | jq -r .spec.host)"
+
+oc set env dc/container-jfr CONTAINER_JFR_LISTEN_HOST="$(oc get route/command-channel -o json | jq -r .spec.host)"
 
 oc create -f "$(dirname "$(readlink -f "$0")")/persistent-volume-claim.yaml"
 
