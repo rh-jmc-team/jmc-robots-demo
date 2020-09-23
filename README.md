@@ -10,27 +10,16 @@ instance for instrumenting the three demo applications with JFR.
 ## Openshift (CodeReady Containers) Run
 
 Install and configure [CodeReady Containers](https://github.com/minishift/minishift) and
-ensure that your `oc` cli commands are working. `cd minishift` into the utility
-script directory.
+ensure that your `oc` cli commands are working. 
 
-Then run `sh setup.sh`, which will create a new project named `robots`
-containing an application corresponding to each of the three applications
-within this project.
+Then run `sh openshift/setup-robots.sh`, which will create a new project named
+`robots` containing an application corresponding to each of the three
+applications within this project.
 
-Next, run `sh client-run.sh` to start a `container-jfr` instance
-within the CRC node, which can then be used interactively to instrument
-each demo application using JFR. Alternatively, run
-`sh run-daemon.sh` to run the `container-jfr` instance in
-non-interactive mode (this will require `jq` to be installed on your local
-system), and use `nc` to connect to the client afterwards.
-
-`sh download-jfr.sh foo` can be used to download a recording named
-`foo` from the `container-jfr` recording exporter. This will save to
-`$PWD/foo.jfr`.
-
-Finally, `sh update-images.sh` can be used to update the CRC
-image registry with the latest application images from the upstream remote
-Docker image repository.
+Then deploy ContainerJFR to the namespace. The easiest way to achieve this is
+to clone the [operator](https://github.com/rh-jmc-team/container-jfr-operator)
+and run `make deploy` (no build is required - an image from the Quay.io remote
+registry will be pulled by your CRC node and deployed).
 
 For more information on how to use ContainerJFR to interact with the robot demo
 applications, visit the `container-jfr`
